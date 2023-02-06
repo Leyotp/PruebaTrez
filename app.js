@@ -10,7 +10,7 @@ const bodyParser    = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/books', (res) => {
+app.get('/books', (req, res) => {
   conn.query("SELECT * FROM books", function (err, data, fields) {
     if(err) return next(new AppError(err))
     res.status(200).json({
@@ -37,6 +37,44 @@ app.post('/books', (req, res, next) => {
     }
   );
  });
+
+ app.get('/books/:id', (req, res, next) => {
+  if (!req.params.id) {
+    return next(new AppError("No book id found", 404));
+  }
+  conn.query(
+    "SELECT * FROM books WHERE id = ?",
+    [req.params.id],
+    function (err, data, fields) {
+      if (err) return next(new AppError(err, 500));
+      res.status(200).json({
+        status: "success",
+        length: data?.length,
+        data: data,
+      });
+    }
+  );
+ })
+
+ app.put('/books/:id', (req, res, next) => {
+  const { title, isbn, genre, author} = req.body;
+  if (!req.params.id) {
+    return next(new AppError("No book id found", 404));
+  }
+  const values = [title, isbn, genre, author, req.params.id];
+  conn.query(
+    "UPDATE books SET title=?,isbn=?,genre=?,author=? WHERE id=?",
+    values,
+    function (err, data, fields) {
+      if (err) return next(new AppError(err, 500));
+      res.status(201).json({
+        status: "success",
+        message: "Book updated!",
+      });
+    }
+  );
+ });
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
