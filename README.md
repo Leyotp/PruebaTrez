@@ -1,7 +1,12 @@
 # PruebaTrez
+books.sql is the DB used, .env.example contains the environment variables used on this code.
+
+
 
 GET: URL: http://localhost:3001/books
     The request is done by accesding the URL, or sending the id through the URL with: http://localhost:3001/books/1 
+    
+    
 POST: BODY OF THE REQUEST
         {
 			
