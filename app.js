@@ -7,9 +7,9 @@ const conn = require("./db");
 const AppError = require("./appError");
 const bodyParser    = require('body-parser');
 
-app.use(bodyParser.json());
+app.use(bodyParser.json()); //Acts as a middleware that will populate req.body as json 
 app.use(bodyParser.urlencoded({ extended: false }));
-
+//GETS the list of Books
 app.get('/books', (req, res) => {
   conn.query("SELECT * FROM books", function (err, data, fields) {
     if(err) return next(new AppError(err))
@@ -22,8 +22,8 @@ app.get('/books', (req, res) => {
 });
 
 app.post('/books', (req, res, next) => {
-  if (!req.body) return next(new AppError("No form data found", 404));
-  const {title, isbn, genre, author} = req.body
+  if (!req.body) return next(new AppError("No form data found", 404)); 
+  const {title, isbn, genre, author} = req.body //req.body is populated with the json matching those names
   var values = [title, isbn, genre, author];
   conn.query(
     "INSERT INTO books(title, isbn, genre, author) VALUES (?,?,?,?)",
@@ -40,11 +40,11 @@ app.post('/books', (req, res, next) => {
 
  app.get('/books/:id', (req, res, next) => {
   if (!req.params.id) {
-    return next(new AppError("No book id found", 404));
+    return next(new AppError("No book id found", 404)); 
   }
   conn.query(
     "SELECT * FROM books WHERE id = ?",
-    [req.params.id],
+    [req.params.id], //req.params.id gets the id from the parameter passed through the url 
     function (err, data, fields) {
       if (err) return next(new AppError(err, 500));
       res.status(200).json({
@@ -70,6 +70,23 @@ app.post('/books', (req, res, next) => {
       res.status(201).json({
         status: "success",
         message: "Book updated!",
+      });
+    }
+  );
+ });
+
+ app.delete('/books/:id', (req, res, next) => {
+  if (!req.params.id) {
+    return next(new AppError("No Book id found", 404));
+  }
+  conn.query(
+    "DELETE FROM books WHERE id=?",
+    [req.params.id],
+    function (err, fields) {
+      if (err) return next(new AppError(err, 500));
+      res.status(201).json({
+        status: "success",
+        message: "Book deleted!",
       });
     }
   );
